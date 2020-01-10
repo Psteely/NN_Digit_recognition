@@ -84,12 +84,15 @@ public class MainClass extends PApplet {
             float[] pic;
             pic = predictionImage;
             for (int i = 0; i < 784; i++) {
-                float val = pic[i];
-                fill(val*255);
+                float val = predictionImage[i];
+
+                stroke(val);
+                fill(val);
+                println(val);
                 rect(pixelSize * (i % 28), pixelSize * (i / 28), pixelSize, pixelSize);
 
             }
-           println(predictionImage);
+           //println(predictionImage);
 
         //}
 
@@ -130,6 +133,7 @@ public class MainClass extends PApplet {
                 int predictionCount = 0;
                 for (int c = 0; c < 28; c++) {        // loop along each column
                     for (int r = 0; r < 28; r++) {     // loop along each row
+                        totalforBox = 0;               //clear the box
                         for (int pc = 0; pc<pixelSize;pc++) {     // loop along each pixel in the box
                             for (int pr = 0; pr<pixelSize;pr++) { // loop along each row in the box
                                 int co =  get((c*pixelSize+pc),(r*pixelSize+pr));
@@ -141,9 +145,12 @@ public class MainClass extends PApplet {
                             }
                         }
                         predictionImage[predictionCount] = totalforBox / (pixelSize*pixelSize);
+                        if (predictionImage[predictionCount] > 255) {
+                            predictionImage[predictionCount] = 255;
+                        }
                         predictionCount ++;
                     }
-                    totalforBox = 0;
+
 
                 }
                 println("ff");
