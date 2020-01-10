@@ -30,7 +30,7 @@ public class MainClass extends PApplet {
     float[][] testing;
     float[][] TestingLabel;
     int errorNum = 0;
-    float[] predictionImage = new float[785];
+    float[] predictionImage = new float[784];
 
 
     Table csvReader;
@@ -45,7 +45,7 @@ public class MainClass extends PApplet {
         surface.setSize(28 * pixelSize, 28 * pixelSize);  // only for showing the number
         line(28,0,28,28);
         nn = new NeuralNetwork(in, middle, out);
-  //      train(1);
+        train(1);
 //        train(2);
 //        train(3);
 
@@ -92,9 +92,25 @@ public class MainClass extends PApplet {
                 rect(pixelSize * (i % 28), pixelSize * (i / 28), pixelSize, pixelSize);
 
             }
-           //println(predictionImage);
+           for (int i =0; i < predictionImage.length; i ++) {
+               predictionImage[i] = predictionImage[i] /255;
+               float[] result = new float[10];
+               println(predictionImage.length);
+               result = nn.predict(predictionImage);      // predict that network
+               printArray(result);
+               float max = -100;
+               float actualResult = -100;
+               for (int r =0; r<result.length; r++) {
+                   if (result[r] > max) {
+                       max = result[r];
+                       actualResult= r;
 
-        //}
+                   }
+               }
+               println(actualResult);
+           }
+
+
 
     }
 
@@ -126,8 +142,9 @@ public class MainClass extends PApplet {
 
         public void keyPressed() {
 
+
             if (keyCode == 32) {     //  only if space bar
-                println("gg");
+
                 //loadPixels();
                 float totalforBox = 0;
                 int predictionCount = 0;
@@ -136,7 +153,7 @@ public class MainClass extends PApplet {
                         totalforBox = 0;               //clear the box
                         for (int pc = 0; pc<pixelSize;pc++) {     // loop along each pixel in the box
                             for (int pr = 0; pr<pixelSize;pr++) { // loop along each row in the box
-                                int co =  get((c*pixelSize+pc),(r*pixelSize+pr));
+                                int co =  get((r*pixelSize+pr),(c*pixelSize+pc));
                                 float red = MainClass.processing.red(co);
                                 float blue = MainClass.processing.blue(co);
                                 float green = MainClass.processing.green(co);
@@ -153,12 +170,14 @@ public class MainClass extends PApplet {
 
 
                 }
-                println("ff");
+
 
                 showPrediction();
             }
-
-        }
+            if (keyCode == 67) {
+                background(0);
+            }
+            }
 
 
 
@@ -243,7 +262,7 @@ public class MainClass extends PApplet {
         percent = (numRight / csvReader.getRowCount()) * 100;
         println("Testing complete");
         println("Percentage right = " + percent);
-        println("Numer of errors = " + errors.size());
+        println("Number of errors = " + errors.size());
     }
 
     void train (int num) {
