@@ -30,20 +30,22 @@ public class MainClass extends PApplet {
     float[][] testing;
     float[][] TestingLabel;
     int errorNum = 0;
+    float[] predictionImage = new float[785];
 
 
     Table csvReader;
     TableRow csvRow;
-    int currentRow;
+
 
 
 
     public void setup() {
         processing = this;
+       background(0);
         surface.setSize(28 * pixelSize, 28 * pixelSize);  // only for showing the number
-
-        nn = new NeuralNetwork(784, 256, 10);
-        train(1);
+        line(28,0,28,28);
+        nn = new NeuralNetwork(in, middle, out);
+  //      train(1);
 //        train(2);
 //        train(3);
 
@@ -55,16 +57,13 @@ public class MainClass extends PApplet {
 
     public void draw() {
 
-
-        //showError();
-
     }
 
     void showError () {
 
-        background(255);
+        background(0);
         if (errors != null) {
-            float[] pic = new float[785];
+            float[] pic;
             pic = errors.get(errorNum);
             for (int i = 0; i < 784; i++) {
                 float val = pic[i+1];
@@ -78,26 +77,92 @@ public class MainClass extends PApplet {
 
     }
 
+    void showPrediction () {
 
-    public void keyPressed() {
-        if (keyCode == 39) {
-            errorNum  ++;
-        } else errorNum --;
-        if (errorNum <0) {
-            errorNum=0;
+        background(0);
+        //if (predictionImage != null) {
+            float[] pic;
+            pic = predictionImage;
+            for (int i = 0; i < 784; i++) {
+                float val = pic[i];
+                fill(val*255);
+                rect(pixelSize * (i % 28), pixelSize * (i / 28), pixelSize, pixelSize);
+
+            }
+           println(predictionImage);
+
+        //}
+
+    }
+
+
+//    public void keyPressed() {
+//        if (keyCode == 39) {
+//            errorNum  ++;
+//        } else errorNum --;
+//        if (errorNum <0) {
+//            errorNum=0;
+//        }
+//
+//        showError();
+//    }
+
+
+
+        public void mouseDragged() {
+
+
+           fill(255);
+            stroke(255);
+            strokeWeight(20);
+        line(pmouseX,pmouseY,mouseX,mouseY);
+
+
+    }
+
+
+        public void keyPressed() {
+
+            if (keyCode == 32) {     //  only if space bar
+                println("gg");
+                //loadPixels();
+                float totalforBox = 0;
+                int predictionCount = 0;
+                for (int c = 0; c < 28; c++) {        // loop along each column
+                    for (int r = 0; r < 28; r++) {     // loop along each row
+                        for (int pc = 0; pc<pixelSize;pc++) {     // loop along each pixel in the box
+                            for (int pr = 0; pr<pixelSize;pr++) { // loop along each row in the box
+                                int co =  get((c*pixelSize+pc),(r*pixelSize+pr));
+                                float red = MainClass.processing.red(co);
+                                float blue = MainClass.processing.blue(co);
+                                float green = MainClass.processing.green(co);
+                                 int grey = (int) (red+blue+green)/3;
+                                totalforBox = totalforBox + grey; //add upp the pixels in the box
+                            }
+                        }
+                        predictionImage[predictionCount] = totalforBox / (pixelSize*pixelSize);
+                        predictionCount ++;
+                    }
+                    totalforBox = 0;
+
+                }
+                println("ff");
+
+                showPrediction();
+            }
+
         }
 
-        showError();
-    }
 
 
     //import java.util.Arrays;
     void test () {
 
 
+        csvReader = null;
 
         println("Testing table load starts");
-        csvReader = loadTable("../../bigdata/mnist_test.csv");      // read in the file
+        csvReader = loadTable("../../bigdata/mnist_test_10.csv");      // read in the file
         println("Testing table load ends");
 
 
@@ -179,7 +244,7 @@ public class MainClass extends PApplet {
         csvReader = null;
         if (num == 1) {
             println("Training table A load starts");
-            csvReader = loadTable("../../bigdata/mnist_train_20000a.csv");      // read in the file
+            csvReader = loadTable("../../bigdata/mnist_train_20000b.csv");      // read in the file
         } else if (num == 2) {
             println("Training table B load starts");
             csvReader = loadTable("../../bigdata/mnist_train_20000b.csv");      // read in the file
