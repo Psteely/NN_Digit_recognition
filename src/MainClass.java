@@ -30,6 +30,7 @@ public class MainClass extends PApplet {
     float[][] testing;
     float[][] TestingLabel;
     int errorNum = 0;
+    float lastKeyPressed;
     float[] predictionImage = new float[784];
 
 
@@ -46,8 +47,8 @@ public class MainClass extends PApplet {
         line(28,0,28,28);
         nn = new NeuralNetwork(in, middle, out);
         train(1);
-//        train(2);
-//        train(3);
+        train(2);
+        train(3);
 
 
 
@@ -78,7 +79,8 @@ public class MainClass extends PApplet {
     }
 
     void showPrediction () {
-
+        float max = -100;
+        float actualResult = -100;
         background(0);
         //if (predictionImage != null) {
             float[] pic;
@@ -88,18 +90,17 @@ public class MainClass extends PApplet {
 
                 stroke(val);
                 fill(val);
-                println(val);
+               // println(val);
                 rect(pixelSize * (i % 28), pixelSize * (i / 28), pixelSize, pixelSize);
 
             }
            for (int i =0; i < predictionImage.length; i ++) {
                predictionImage[i] = predictionImage[i] /255;
                float[] result = new float[10];
-               println(predictionImage.length);
+               //println(predictionImage.length);
                result = nn.predict(predictionImage);      // predict that network
-               printArray(result);
-               float max = -100;
-               float actualResult = -100;
+
+
                for (int r =0; r<result.length; r++) {
                    if (result[r] > max) {
                        max = result[r];
@@ -107,10 +108,10 @@ public class MainClass extends PApplet {
 
                    }
                }
-               println(actualResult);
+
            }
 
-
+        println(actualResult);
 
     }
 
@@ -142,42 +143,46 @@ public class MainClass extends PApplet {
 
         public void keyPressed() {
 
+            if (lastKeyPressed != 32) {
+                if (keyCode == 32) {     //  only if space bar
+                    lastKeyPressed = keyCode;
 
-            if (keyCode == 32) {     //  only if space bar
-
-                //loadPixels();
-                float totalforBox = 0;
-                int predictionCount = 0;
-                for (int c = 0; c < 28; c++) {        // loop along each column
-                    for (int r = 0; r < 28; r++) {     // loop along each row
-                        totalforBox = 0;               //clear the box
-                        for (int pc = 0; pc<pixelSize;pc++) {     // loop along each pixel in the box
-                            for (int pr = 0; pr<pixelSize;pr++) { // loop along each row in the box
-                                int co =  get((r*pixelSize+pr),(c*pixelSize+pc));
-                                float red = MainClass.processing.red(co);
-                                float blue = MainClass.processing.blue(co);
-                                float green = MainClass.processing.green(co);
-                                 int grey = (int) (red+blue+green)/3;
-                                totalforBox = totalforBox + grey; //add upp the pixels in the box
+                    //loadPixels();
+                    float totalforBox = 0;
+                    int predictionCount = 0;
+                    for (int c = 0; c < 28; c++) {        // loop along each column
+                        for (int r = 0; r < 28; r++) {     // loop along each row
+                            totalforBox = 0;               //clear the box
+                            for (int pc = 0; pc < pixelSize; pc++) {     // loop along each pixel in the box
+                                for (int pr = 0; pr < pixelSize; pr++) { // loop along each row in the box
+                                    int co = get((r * pixelSize + pr), (c * pixelSize + pc));
+                                    float red = MainClass.processing.red(co);
+                                    float blue = MainClass.processing.blue(co);
+                                    float green = MainClass.processing.green(co);
+                                    int grey = (int) (red + blue + green) / 3;
+                                    totalforBox = totalforBox + grey; //add upp the pixels in the box
+                                }
                             }
+                            predictionImage[predictionCount] = totalforBox / (pixelSize * pixelSize);
+                            if (predictionImage[predictionCount] > 255) {
+                                predictionImage[predictionCount] = 255;
+                            }
+                            predictionCount++;
                         }
-                        predictionImage[predictionCount] = totalforBox / (pixelSize*pixelSize);
-                        if (predictionImage[predictionCount] > 255) {
-                            predictionImage[predictionCount] = 255;
-                        }
-                        predictionCount ++;
+
+
                     }
 
 
+                    showPrediction();
                 }
-
-
-                showPrediction();
             }
             if (keyCode == 67) {
                 background(0);
             }
-            }
+            lastKeyPressed = keyCode;
+        }
+
 
 
 
@@ -188,7 +193,7 @@ public class MainClass extends PApplet {
         csvReader = null;
 
         println("Testing table load starts");
-        csvReader = loadTable("../../bigdata/mnist_test_10.csv");      // read in the file
+        csvReader = loadTable("../../bigdata/mnist_test.csv");      // read in the file
         println("Testing table load ends");
 
 
@@ -242,6 +247,7 @@ public class MainClass extends PApplet {
                     max = result[r];
                     actualResult= r;
                 }
+                //println(result);
             }
             // whats the percentage
 

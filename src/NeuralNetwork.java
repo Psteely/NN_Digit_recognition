@@ -42,6 +42,16 @@ class NeuralNetwork {
         // return as an array
         float[] ffArray = new float[output];
         ffArray = matrix.toArray(outMatrix);
+        // Just need to normalise probabilities to total 1
+        float sum = 0;
+        for (int i= 0;i <ffArray.length; i++) {
+            ffArray[i] = (float) Math.exp( (float) ffArray[i]);
+            sum = sum + ffArray[i];
+        }
+        for (int i= 0;i <ffArray.length; i++) {
+            ffArray[i] = ffArray[i] / sum;
+
+        }
         return ffArray;
     }
     void train (float[] inArray_, float[] targets_, float lr_) {
